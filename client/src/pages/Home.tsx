@@ -11,9 +11,24 @@ export default function Home() {
   const [, navigate] = useLocation();
 
   useSeo({
-    title: "Flight Visualizer Pro — Visualização e telemetria de voos de drone",
+    // Título: 42 caracteres (dentro do limite de 30–60)
+    title: "Flight Visualizer Pro — Voos de Drone",
     description:
       "Plataforma para pilotos de drone e empresas: importe telemetria, visualize trajetórias em mapa, gere relatórios em PDF e gerencie suas operações com elegância.",
+    keywords: [
+      "drone",
+      "voo de drone",
+      "telemetria drone",
+      "visualizador de voo",
+      "log DJI",
+      "SARPAS",
+      "mapeamento aéreo",
+      "inspeção aérea",
+      "agricultura de precisão",
+      "relatório de voo PDF",
+      "pilotos de drone",
+      "gestão de voos",
+    ],
     path: "/",
   });
 

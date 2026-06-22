@@ -3,6 +3,8 @@ import { useEffect } from "react";
 interface SeoOptions {
   title: string;
   description?: string;
+  /** Lista de palavras-chave separadas por vírgula ou array de strings. */
+  keywords?: string | string[];
   /** Caminho relativo (ex: /app). Usado para canonical e og:url. */
   path?: string;
   /** Se true, instrui crawlers a não indexar (áreas privadas/admin). */
@@ -36,7 +38,7 @@ function setLink(rel: string, href: string) {
  * Aplica título e metadados de SEO à página atual de forma declarativa.
  * Mantém o app preparado para indexação, Open Graph e canonical URLs.
  */
-export function useSeo({ title, description, path, noindex, image }: SeoOptions) {
+export function useSeo({ title, description, keywords, path, noindex, image }: SeoOptions) {
   useEffect(() => {
     const fullTitle = title.includes(SITE_NAME) ? title : `${title} · ${SITE_NAME}`;
     document.title = fullTitle;
@@ -45,6 +47,11 @@ export function useSeo({ title, description, path, noindex, image }: SeoOptions)
       setMeta("name", "description", description);
       setMeta("property", "og:description", description);
       setMeta("name", "twitter:description", description);
+    }
+
+    if (keywords) {
+      const kw = Array.isArray(keywords) ? keywords.join(", ") : keywords;
+      setMeta("name", "keywords", kw);
     }
 
     setMeta("property", "og:title", fullTitle);
@@ -65,5 +72,5 @@ export function useSeo({ title, description, path, noindex, image }: SeoOptions)
       setLink("canonical", url);
       setMeta("property", "og:url", url);
     }
-  }, [title, description, path, noindex, image]);
+  }, [title, description, keywords, path, noindex, image]);
 }
