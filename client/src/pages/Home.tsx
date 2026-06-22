@@ -1,13 +1,21 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { ArrowRight, Map, Plane, ShieldCheck, FileJson, Share2, Printer, Heart } from "lucide-react";
+import { useSeo } from "@/lib/seo";
+import { ArrowRight, Map, Plane, ShieldCheck, FileJson, Share2, Printer, Heart, LayoutDashboard } from "lucide-react";
 import { useEffect } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export default function Home() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
+
+  useSeo({
+    title: "Flight Visualizer Pro — Visualização e telemetria de voos de drone",
+    description:
+      "Plataforma para pilotos de drone e empresas: importe telemetria, visualize trajetórias em mapa, gere relatórios em PDF e gerencie suas operações com elegância.",
+    path: "/",
+  });
 
   useEffect(() => {
     if (!loading && user) {
@@ -29,13 +37,30 @@ export default function Home() {
               <div className="text-[10px] tracking-[0.18em] uppercase text-muted-foreground">Pro · SARPAS</div>
             </div>
           </div>
-          <Button
-            onClick={() => (window.location.href = getLoginUrl())}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            Entrar com Google
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/planos"
+              className="hidden rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
+            >
+              Planos
+            </Link>
+            {!loading && user?.role === "admin" && (
+              <Link
+                href="/admin"
+                className="hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Admin
+              </Link>
+            )}
+            <Button
+              onClick={() => (window.location.href = getLoginUrl())}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              Entrar com Google
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </header>
 

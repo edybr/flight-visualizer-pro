@@ -11,6 +11,13 @@ import SharedFlight from "./pages/SharedFlight";
 import ActualFlights from "./pages/ActualFlights";
 import ActualFlightDetail from "./pages/ActualFlightDetail";
 import SharedActualFlight from "./pages/SharedActualFlight";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminFlights from "./pages/admin/AdminFlights";
+import AdminLeads from "./pages/admin/AdminLeads";
+import AdminRevenue from "./pages/admin/AdminRevenue";
+import AdminPlans from "./pages/admin/AdminPlans";
+import Plans from "./pages/Plans";
 
 function Router() {
   return (
@@ -22,6 +29,13 @@ function Router() {
       <Route path={"/app/actual"} component={ActualFlights} />
       <Route path={"/actual/:id"} component={ActualFlightDetail} />
       <Route path={"/share-actual/:token"} component={SharedActualFlight} />
+      <Route path={"/planos"} component={Plans} />
+      <Route path={"/admin"} component={AdminDashboard} />
+      <Route path={"/admin/users"} component={AdminUsers} />
+      <Route path={"/admin/flights"} component={AdminFlights} />
+      <Route path={"/admin/leads"} component={AdminLeads} />
+      <Route path={"/admin/revenue"} component={AdminRevenue} />
+      <Route path={"/admin/plans"} component={AdminPlans} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

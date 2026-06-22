@@ -36,6 +36,25 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+
+  // SEO: sitemap.xml dinâmico com URLs absolutas (o domínio só é conhecido em runtime)
+  app.get("/sitemap.xml", (req, res) => {
+    const proto = (req.headers["x-forwarded-proto"] as string) || req.protocol || "https";
+    const host = req.headers.host || "";
+    const base = `${proto}://${host}`;
+    const urls = [
+      { loc: `${base}/`, priority: "1.0" },
+      { loc: `${base}/planos`, priority: "0.8" },
+    ];
+    const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
+      .map(
+        (u) =>
+          `  <url>\n    <loc>${u.loc}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`
+      )
+      .join("\n")}\n</urlset>\n`;
+    res.setHeader("Content-Type", "application/xml");
+    res.send(body);
+  });
   // tRPC API
   app.use(
     "/api/trpc",

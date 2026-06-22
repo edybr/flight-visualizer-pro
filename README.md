@@ -6,7 +6,7 @@ autorizações de voo no formato **SARPAS** (JSON) e logs de voos realmente exec
 trajetória em mapas interativos, com filtros, anotações, compartilhamento público,
 playback temporal da telemetria e exportação de relatório em **PDF**.
 
-> Versão atual: **v1.7** — exportação de telemetria em PDF na página de detalhe do voo realizado.
+> Versão atual: **v2.0** — plataforma SaaS multiusuário com painel administrativo (Usuários, Voos, Leads e Receita), filtro global de período e base de planos.
 > O histórico completo de versões está em [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
@@ -94,6 +94,15 @@ impressão otimizada e, no caso dos voos realizados, exportação da telemetria 
 - Impressão com CSS otimizado.
 - Crédito de autoria e seção de doação via Pix no rodapé.
 
+### Plataforma SaaS e painel administrativo (v2.0)
+- **Painel administrativo** (`/admin`) restrito a administradores, com layout dedicado e guarda de acesso por `role`.
+- **Dashboard de indicadores** em quatro blocos — Usuários, Voos, Leads e Receita (estrutura) — com cartões e gráficos.
+- **Filtro global de período** (hoje, ontem, últimos 7/30/90 dias, este mês, mês anterior, este ano e personalizado), atualizando todos os indicadores automaticamente.
+- **Páginas administrativas** de Usuários, Voos recentes, Leads/CRM (com alteração de status), Receita e Planos.
+- **Página pública de Planos** (`/planos`) e **formulário de captura de leads** que alimenta as métricas.
+- **Base de planos pagos** (tabelas `plans` e `subscriptions`) preparada para monetização futura, sem cobrança real ativada.
+- **SEO** (títulos/meta dinâmicos, Open Graph, canonical, `robots.txt`, `sitemap.xml`, `noindex` em áreas privadas) e **base de i18n** (pt-BR).
+
 O detalhamento por versão está em [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
 
 ---
@@ -134,17 +143,23 @@ client/
     components/   UI reutilizável (FlightMap, TrajectoryMap, SiteFooter, ui/*)
     lib/          Utilitários testáveis (telemetry.ts, telemetryPdf.ts, playback.ts)
     const.ts      Constantes do cliente (APP_VERSION, getLoginUrl)
+    pages/admin/  Painel administrativo (AdminDashboard, AdminUsers, AdminFlights, AdminLeads, AdminRevenue, AdminPlans)
+    components/admin/  Componentes do admin (AdminLayout, PeriodFilter, StatCard, TrendChart)
+    lib/          Utilitários (telemetry, telemetryPdf, playback, seo, i18n, format)
 drizzle/
-  schema.ts       Tabelas: users, flights, notes, actual_flights
+  schema.ts       Tabelas: users, flights, notes, actual_flights, leads, plans, subscriptions, activity_events
   migrations/     Migrações geradas pelo drizzle-kit
 server/
   routers.ts      Procedures tRPC (auth, flights, actualFlights, notes)
+  routers/admin.ts  Procedures administrativas (dashboard, listagens, leads, planos)
+  adminMetrics.ts Camada de agregação de métricas por período
   db.ts           Helpers de consulta (Drizzle)
   djiLog.ts       Parsers DJI TXT / CSV / KML
   sarpas.ts       Validação e parsing SARPAS
   storage.ts      Helpers de armazenamento S3
 shared/
   const.ts        Constantes compartilhadas (COOKIE_NAME, etc.)
+  period.ts       Resolução de períodos (presets + custom), pura e testável
   types.ts        Tipos compartilhados
 docs/             Documentação (arquitetura, instalação, changelog, manual)
 ```
@@ -218,10 +233,14 @@ O schema é definido em `drizzle/schema.ts` e versionado em `drizzle/migrations/
 
 | Tabela | Função |
 | --- | --- |
-| `users` | Usuários autenticados via OAuth |
+| `users` | Usuários autenticados via OAuth (campo `role`: user/admin) |
 | `flights` | Voos autorizados (SARPAS) |
 | `notes` | Anotações associadas a um voo |
 | `actual_flights` | Voos realizados com trajetória e telemetria em JSON |
+| `leads` | Leads capturados (origem, status, conversão) para o CRM/funil |
+| `plans` | Planos comerciais (Gratuito, Pro, Business) |
+| `subscriptions` | Assinaturas de usuários a planos (estrutura) |
+| `activity_events` | Eventos de atividade para métricas DAU/WAU/MAU |
 
 O fluxo recomendado é **editar o schema → `pnpm db:push` → verificar**.
 
@@ -233,9 +252,9 @@ O fluxo recomendado é **editar o schema → `pnpm db:push` → verificar**.
 pnpm test
 ```
 
-A suíte atual contém **54 testes** distribuídos em parsers (SARPAS e DJI), utilitários de
-telemetria, geração de PDF, playback e autenticação. Todos os testes devem passar antes de
-cada publicação.
+A suíte atual contém **72 testes** distribuídos em parsers (SARPAS e DJI), utilitários de
+telemetria, geração de PDF, playback, autenticação, resolução de períodos e contrato das
+métricas administrativas. Todos os testes devem passar antes de cada publicação.
 
 ---
 
@@ -246,14 +265,14 @@ cada publicação.
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Arquitetura, fluxo de dados e decisões técnicas |
 | [`docs/INSTALL.md`](docs/INSTALL.md) | Instalação, execução e variáveis de ambiente |
 | [`docs/USER_MANUAL.md`](docs/USER_MANUAL.md) | Manual do usuário final |
-| [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | Histórico de versões (1.0 → 1.7) |
+| [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | Histórico de versões (1.0 → 2.0) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Guia de contribuição |
 
 ---
 
 ## Roadmap
 
-- **v2.x** — Gráficos de altitude/bateria no PDF; exportação CSV; PDF na página pública.
+- **v2.x** — Ativação de cobrança real (planos pagos) e preenchimento dos indicadores de receita; gráficos de altitude/bateria no PDF; exportação CSV.
 - **v3.0** — Manual do usuário acessível diretamente por um menu de ajuda dentro da aplicação.
 
 ---

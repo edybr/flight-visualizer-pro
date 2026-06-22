@@ -2,6 +2,37 @@
 
 Histórico de versões. A numeração começa em 1.0 e é incrementada a cada publicação.
 
+## v2.0 — Plataforma SaaS multiusuário + Painel administrativo
+
+### Adicionado
+- **Painel administrativo** (`/admin`), acessível apenas a administradores (`role = admin`), com layout dedicado (sidebar navy) e guarda de acesso.
+- **Dashboard de Visão geral** com quatro blocos de indicadores:
+  - **Usuários**: total cadastrados, ativos hoje/semana/mês, novos no período, crescimento percentual vs. período anterior, e gráfico de novos usuários ao longo do tempo.
+  - **Voos**: total importados, importados no período, horas totais de voo, distância total, média de voos por usuário, e gráfico de importações.
+  - **Leads**: gerados no período, convertidos, taxa de conversão e origem dos leads.
+  - **Receita (estrutura)**: MRR, receita do período/mensal/anual, ticket médio, LTV estimado, churn rate e assinaturas ativas (preenchidos quando a cobrança for ativada).
+- **Filtro global de período** com presets (hoje, ontem, últimos 7/30/90 dias, este mês, mês anterior, este ano) e intervalo **personalizado**; todos os indicadores e gráficos se atualizam automaticamente ao trocar o período.
+- **Páginas administrativas de detalhe**: Usuários, Voos recentes, Leads/CRM (com alteração de status), Receita e Planos.
+- **Página pública de Planos** (`/planos`) com três planos (Gratuito, Pro, Business) consumindo dados reais do banco, e **formulário público de captura de leads** que alimenta as métricas.
+- **Estrutura de planos pagos**: tabelas `plans` e `subscriptions` (sem cobrança real ainda), preparando a base de monetização.
+- **Separação de ambientes**: app do usuário (`/app`) e ambiente administrativo (`/admin`), com acesso ao painel exibido no app apenas para administradores.
+- **SEO**: títulos e meta tags dinâmicos (`useSeo`), Open Graph/Twitter, canonical, `robots.txt`, `sitemap.xml` dinâmico com URLs absolutas e `noindex` nas áreas privadas (`/app`, `/admin`).
+- **Base de internacionalização (i18n)**: dicionário pt-BR e helper `t()`, preparando o suporte a múltiplos idiomas.
+- **Rastreio de atividade** (best-effort) para cálculo de usuários ativos (DAU/WAU/MAU).
+
+### Banco de dados
+- Novas tabelas: `leads`, `plans`, `subscriptions`, `activity_events`.
+- Planos base inseridos: Gratuito, Pro, Business.
+
+### Técnico
+- Camada de período pura e testável em `shared/period.ts`.
+- Camada de métricas em `server/adminMetrics.ts` e router `server/routers/admin.ts` (procedure única `admin.dashboard`).
+- Série temporal e agregação de origem dos leads calculadas no servidor (em JS) para evitar incompatibilidades com `only_full_group_by` do MySQL.
+- **72 testes Vitest no total** (adicionados testes de período e de contrato das métricas).
+
+### Observação de stack
+- O projeto permanece sobre o template Manus (React + tRPC + Express + Drizzle + MySQL), diferente das tecnologias preferidas do usuário (Next.js/NestJS/PostgreSQL/Auth0/Asaas/Docker). A documentação registra isso de forma transparente.
+
 ## v1.7 — Exportação da telemetria em PDF
 - Botão "Exportar PDF" na página de detalhe do voo realizado (ao lado de Imprimir), com spinner.
 - Geração de PDF no navegador com jsPDF + jspdf-autotable (sem carga no servidor).

@@ -1,7 +1,7 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
 // Versão da aplicação (incrementada a cada publicação).
-export const APP_VERSION = "1.7";
+export const APP_VERSION = "2.0";
 
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {

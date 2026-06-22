@@ -130,3 +130,48 @@
 - [x] APP_VERSION atualizado para 1.7
 - [x] Testes vitest: 11 testes dos utilitários + 3 de smoke do PDF (54 testes no total, todos passando)
 - [x] Importações e autenticação NÃO alteradas (apenas leitura dos dados já carregados)
+
+## v2.0 - Plataforma SaaS + Painel Administrativo
+
+### Base / Modelagem
+- [x] Tabela `leads` (origem, status, criado em, convertido em) no schema
+- [x] Tabela `plans` (nome, slug, preço, intervalo, ativo) — estrutura para planos gratuitos/pagos
+- [x] Tabela `subscriptions` (userId, planId, status, início/fim) — estrutura de assinatura
+- [x] Tabela `activity_events` (userId, tipo, criado em) para usuários ativos (DAU/WAU/MAU)
+- [x] Plano atual via subscriptions (estrutura)
+- [x] Migrações aplicadas com `pnpm db:push`
+
+### Backend / Métricas
+- [x] `adminProcedure` (gate por role=admin) reutilizado em server/routers/admin.ts
+- [x] Registro de atividade (best-effort) no auth.me e nas importações
+- [x] Helpers de agregação por período (hoje, ontem, 7d, 30d, 90d, mês atual, mês anterior, ano, custom) + testes
+- [x] Métricas de Usuários: total, ativos hoje/semana/mês, novos no período, crescimento %
+- [x] Métricas de Voos: total importados, no período, horas totais, distância total, média por usuário
+- [x] Métricas de Leads: gerados no período, convertidos, taxa de conversão, origem
+- [x] Métricas de Receita (estrutura): MRR, receita período/mensal/anual, ticket médio, LTV, churn
+- [x] Procedure única `admin.dashboard` que aceita preset/custom e retorna todos os blocos
+
+### Painel Administrativo (frontend)
+- [x] Rota /admin protegida (somente admin), com layout próprio (AdminLayout dedicado)
+- [x] Filtro global de período (hoje, ontem, 7d, 30d, 90d, este mês, mês anterior, este ano, personalizado)
+- [x] Cartões e gráficos de Usuários (recharts)
+- [x] Cartões e gráficos de Voos
+- [x] Cartões e gráficos de Leads
+- [x] Cartões de Receita (estrutura, com placeholders quando sem dados)
+- [x] Atualização automática de todos os indicadores ao mudar o período
+- [x] Páginas de detalhe: Usuários, Voos, Leads/CRM (com mudança de status), Receita, Planos
+
+### SaaS shell / UX
+- [x] Separação clara entre ambiente do usuário (/app) e administrativo (/admin), com acesso admin condicionado a role
+- [x] Entrada de captura de leads (formulário público em /planos) alimentando métricas de leads
+- [x] Base de planos gratuitos/pagos (página pública /planos + admin/plans, sem cobrança real ainda)
+- [x] Responsividade em todas as páginas novas
+- [x] Tema navy/marfim/dourado consistente
+- [x] SEO: títulos, meta description, Open Graph, canonical, robots, sitemap básico, noindex em áreas privadas
+- [x] Preparação para i18n (dicionário pt-BR + helper t())
+
+### Testes e documentação
+- [x] Testes Vitest dos helpers de período e agregações de métricas (72 testes no total)
+- [x] Atualizar APP_VERSION para 2.0
+- [x] Atualizar CHANGELOG e documentação (README, CHANGELOG)
+- [ ] Versionar no GitHub e salvar checkpoint

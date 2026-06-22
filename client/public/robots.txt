@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /planos
+Disallow: /app
+Disallow: /admin
+Disallow: /flights
+Disallow: /actual
+Disallow: /share
+Disallow: /share-actual
+
+Sitemap: /sitemap.xml

@@ -5,16 +5,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { ArrowRight, CalendarDays, FileJson, Loader2, LogOut, Plane, PlaneTakeoff, Route, Search, Upload } from "lucide-react";
+import { ArrowRight, CalendarDays, FileJson, Loader2, LogOut, Plane, PlaneTakeoff, Route, Search, Upload, LayoutDashboard } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import SiteFooter from "@/components/SiteFooter";
 import { APP_VERSION } from "@/const";
+import { useSeo } from "@/lib/seo";
 
 export default function Dashboard() {
   const { user, loading, logout } = useAuth({ redirectOnUnauthenticated: true });
   const [, navigate] = useLocation();
+  useSeo({ title: "Meus voos", noindex: true });
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -125,6 +127,16 @@ export default function Dashboard() {
                 </span>
               )}
             </button>
+            {user.role === "admin" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-card"
+                onClick={() => navigate("/admin")}
+              >
+                <LayoutDashboard className="h-4 w-4 mr-2" /> Painel admin
+              </Button>
+            )}
             <div className="hidden sm:block text-right">
               <div className="text-sm font-medium">{user.name ?? "Operador"}</div>
               <div className="text-xs text-muted-foreground">{user.email}</div>

@@ -27,6 +27,8 @@ import {
 } from "./db";
 import { parseActualFlightAsync } from "./djiLog";
 import { validateSarpasFile } from "./sarpas";
+import { adminRouter, leadCaptureRouter } from "./routers/admin";
+import { recordActivity } from "./adminMetrics";
 
 const filtersSchema = z.object({
   startDate: z.string().optional(),
@@ -37,8 +39,17 @@ const filtersSchema = z.object({
 
 export const appRouter = router({
   system: systemRouter,
+  admin: adminRouter,
+  leads: leadCaptureRouter,
+
   auth: router({
-    me: publicProcedure.query((opts) => opts.ctx.user),
+    me: publicProcedure.query((opts) => {
+      // Registra atividade do usuário autenticado (best-effort) para métricas DAU/WAU/MAU.
+      if (opts.ctx.user) {
+        void recordActivity({ userId: opts.ctx.user.id, type: "session" });
+      }
+      return opts.ctx.user;
+    }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -78,6 +89,7 @@ export const appRouter = router({
           });
         }
 
+        void recordActivity({ userId: ctx.user.id, type: "import_flight" });
         let imported = 0;
         let updated = 0;
 
@@ -199,6 +211,7 @@ export const appRouter = router({
         if (!result.ok) {
           throw new TRPCError({ code: "BAD_REQUEST", message: result.error });
         }
+        void recordActivity({ userId: ctx.user.id, type: "import_actual" });
         const data = result.data;
         const created = await createActualFlight({
           userId: ctx.user.id,

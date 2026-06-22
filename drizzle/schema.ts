@@ -124,3 +124,118 @@ export const actualFlights = mysqlTable(
 
 export type ActualFlight = typeof actualFlights.$inferSelect;
 export type InsertActualFlight = typeof actualFlights.$inferInsert;
+
+/**
+ * Leads - cadastros de interesse capturados (formulário, landing, etc.) para o funil de
+ * conversão SaaS. `status` evolui de "new" até "converted". `convertedAt` marca a conversão.
+ */
+export const leads = mysqlTable(
+  "leads",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    name: varchar("name", { length: 255 }),
+    email: varchar("email", { length: 320 }),
+    company: varchar("company", { length: 255 }),
+    segment: varchar("segment", { length: 64 }), // inspeção, mapeamento, agro, audiovisual, perícia...
+    source: varchar("source", { length: 64 }).default("site").notNull(), // origem do lead
+    status: mysqlEnum("status", ["new", "contacted", "qualified", "converted", "lost"]) 
+      .default("new")
+      .notNull(),
+    message: text("message"),
+    convertedUserId: int("convertedUserId"), // usuário criado a partir do lead, se houver
+    convertedAt: timestamp("convertedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    statusIdx: index("lead_status_idx").on(table.status),
+    sourceIdx: index("lead_source_idx").on(table.source),
+    createdIdx: index("lead_created_idx").on(table.createdAt),
+  })
+);
+
+export type Lead = typeof leads.$inferSelect;
+export type InsertLead = typeof leads.$inferInsert;
+
+/**
+ * Plans - catálogo de planos (gratuitos e pagos). Estrutura preparada para cobrança futura.
+ * `priceCents` em centavos para evitar float; `interval` define a recorrência.
+ */
+export const plans = mysqlTable(
+  "plans",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    slug: varchar("slug", { length: 64 }).notNull().unique(),
+    name: varchar("name", { length: 128 }).notNull(),
+    description: text("description"),
+    priceCents: int("priceCents").default(0).notNull(),
+    currency: varchar("currency", { length: 8 }).default("BRL").notNull(),
+    interval: mysqlEnum("interval", ["month", "year", "lifetime", "free"]) 
+      .default("free")
+      .notNull(),
+    maxFlights: int("maxFlights"), // null = ilimitado
+    features: json("features"), // lista de features do plano
+    isActive: int("isActive").default(1).notNull(), // 1 = ativo, 0 = inativo
+    sortOrder: int("sortOrder").default(0).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  }
+);
+
+export type Plan = typeof plans.$inferSelect;
+export type InsertPlan = typeof plans.$inferInsert;
+
+/**
+ * Subscriptions - assinatura de um usuário a um plano. Estrutura para MRR/receita.
+ * `amountCents` registra o valor pago no ciclo (snapshot, independente de mudanças no plano).
+ */
+export const subscriptions = mysqlTable(
+  "subscriptions",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    planId: int("planId").notNull(),
+    status: mysqlEnum("status", ["active", "trialing", "past_due", "canceled", "expired"]) 
+      .default("active")
+      .notNull(),
+    amountCents: int("amountCents").default(0).notNull(),
+    currency: varchar("currency", { length: 8 }).default("BRL").notNull(),
+    interval: mysqlEnum("interval", ["month", "year", "lifetime", "free"]) 
+      .default("free")
+      .notNull(),
+    startedAt: timestamp("startedAt").defaultNow().notNull(),
+    currentPeriodEnd: timestamp("currentPeriodEnd"),
+    canceledAt: timestamp("canceledAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    userIdx: index("sub_user_idx").on(table.userId),
+    statusIdx: index("sub_status_idx").on(table.status),
+  })
+);
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+/**
+ * Activity events - registro leve de atividade do usuário para métricas DAU/WAU/MAU.
+ * Um evento por interação relevante (login, importação, etc.).
+ */
+export const activityEvents = mysqlTable(
+  "activity_events",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    type: varchar("type", { length: 64 }).notNull(), // login, import_flight, import_actual, export_pdf...
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdx: index("activity_user_idx").on(table.userId),
+    createdIdx: index("activity_created_idx").on(table.createdAt),
+    typeIdx: index("activity_type_idx").on(table.type),
+  })
+);
+
+export type ActivityEvent = typeof activityEvents.$inferSelect;
+export type InsertActivityEvent = typeof activityEvents.$inferInsert;
