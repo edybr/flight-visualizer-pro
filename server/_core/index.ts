@@ -5,6 +5,7 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
+import { registerDevAuthRoutes } from "../devAuth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -36,6 +37,21 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  // Login de desenvolvimento. Em produção só é habilitado se ALLOW_DEV_LOGIN=true
+  // E DEV_LOGIN_SECRET estiver definido (fail-closed): sem o segredo a rota não é
+  // registrada, evitando um backdoor de admin aberto por configuração incompleta.
+  const devLoginRequested =
+    process.env.NODE_ENV === "development" ||
+    process.env.ALLOW_DEV_LOGIN === "true";
+  if (devLoginRequested) {
+    if (process.env.NODE_ENV === "production" && !process.env.DEV_LOGIN_SECRET) {
+      console.warn(
+        "[DevAuth] ALLOW_DEV_LOGIN=true mas DEV_LOGIN_SECRET não definido — rota /api/dev-login NÃO registrada (fail-closed)."
+      );
+    } else {
+      registerDevAuthRoutes(app);
+    }
+  }
 
   // SEO: sitemap.xml dinâmico com URLs absolutas (o domínio só é conhecido em runtime)
   app.get("/sitemap.xml", (req, res) => {

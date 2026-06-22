@@ -1,0 +1,16 @@
+node_modules
+dist
+build
+.git
+.gitignore
+*.log
+.env
+.env.*
+.vscode
+.idea
+.webdev
+.pnpm-store
+coverage
+tmp
+temp
+deploy/.env
