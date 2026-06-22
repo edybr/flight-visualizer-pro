@@ -174,4 +174,4 @@
 - [x] Testes Vitest dos helpers de período e agregações de métricas (72 testes no total)
 - [x] Atualizar APP_VERSION para 2.0
 - [x] Atualizar CHANGELOG e documentação (README, CHANGELOG)
-- [ ] Versionar no GitHub e salvar checkpoint
+- [x] Versionar no GitHub (commit a90caa7 + tag/release v2.0) e salvar checkpoint
