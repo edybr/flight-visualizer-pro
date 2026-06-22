@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { useSeo } from "@/lib/seo";
-import { ArrowRight, Map, Plane, ShieldCheck, FileJson, Share2, Printer, Heart, LayoutDashboard } from "lucide-react";
+import { ArrowRight, Map, Plane, ShieldCheck, FileJson, Share2, Printer, LayoutDashboard } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useLocation } from "wouter";
 
@@ -159,25 +159,14 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Rodapé da landing — personalize o texto abaixo conforme desejar */}
       <footer className="border-t border-border/60">
         <div className="container py-10 flex flex-col items-center justify-between gap-5 text-sm text-muted-foreground sm:flex-row">
           <div className="flex items-center gap-2">
             <span>© {new Date().getFullYear()} Flight Visualizer Pro</span>
-            <span className="text-border">·</span>
-            <span>by <span className="font-medium text-foreground">Isaias Alves</span></span>
+            {/* Adicione seu crédito aqui, ex.: <span>· by Seu Nome</span> */}
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              navigator.clipboard.writeText("isaias.oceano@gmail.com");
-            }}
-            className="group flex items-center gap-2 rounded-full border border-border/70 bg-card px-3.5 py-1.5 transition-transform active:scale-[0.98] hover:border-accent/60"
-            aria-label="Copiar chave Pix para doação"
-          >
-            <Heart className="h-3.5 w-3.5 text-accent" />
-            <span className="text-xs uppercase tracking-wider text-accent">Doe via Pix</span>
-            <span className="font-mono text-xs text-foreground">isaias.oceano@gmail.com</span>
-          </button>
+          {/* Adicione informações de contato ou links aqui */}
         </div>
       </footer>
     </div>
