@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1779611455752,
+      "tag": "0000_fixed_absorbing_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1779611814373,
+      "tag": "0001_nice_daredevil",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1780135896863,
+      "tag": "0002_talented_baron_zemo",
+      "breakpoints": true
+    }
+  ]
+}
