@@ -3,20 +3,6 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 // Versão da aplicação (incrementada a cada publicação).
 export const APP_VERSION = "2.0";
 
-// Generate login URL at runtime so redirect URI reflects the current origin.
-export const getLoginUrl = () => {
-  const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
-  const appId = import.meta.env.VITE_APP_ID;
-  const redirectUri = `${window.location.origin}/api/oauth/callback`;
-  const state = btoa(redirectUri);
-
-  const url = new URL(`${oauthPortalUrl}/app-auth`);
-  url.searchParams.set("appId", appId);
-  url.searchParams.set("redirectUri", redirectUri);
-  url.searchParams.set("state", state);
-  url.searchParams.set("type", "signIn");
-  // Restrict the OAuth flow to the Google provider.
-  url.searchParams.set("provider", "google");
-
-  return url.toString();
-};
+// Login próprio com Google OAuth (rota same-origin no backend), substituindo o
+// portal OAuth da Manus. Ver server/googleAuth.ts.
+export const getLoginUrl = () => "/api/auth/google/login";

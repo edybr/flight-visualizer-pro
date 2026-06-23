@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { registerDevAuthRoutes } from "../devAuth";
+import { registerGoogleAuthRoutes } from "../googleAuth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -37,6 +38,8 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  // Login próprio com Google OAuth (substitui o portal Manus). Ver server/googleAuth.ts.
+  registerGoogleAuthRoutes(app);
   // Login de desenvolvimento. Em produção só é habilitado se ALLOW_DEV_LOGIN=true
   // E DEV_LOGIN_SECRET estiver definido (fail-closed): sem o segredo a rota não é
   // registrada, evitando um backdoor de admin aberto por configuração incompleta.
