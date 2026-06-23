@@ -1,0 +1,18 @@
+# Caddy — reverse proxy + HTTPS automático.
+{
+	# Sem redirects automáticos http->https: o bloco :80 abaixo cuida da porta 80
+	# (mantém acesso por IP antes do DNS apontar e serve o desafio ACME).
+	auto_https disable_redirects
+}
+
+# HTTPS com certificado Let's Encrypt, emitido automaticamente assim que o DNS
+# de djiflaylog.app apontar para este servidor.
+djiflaylog.app, www.djiflaylog.app {
+	reverse_proxy app:3000
+}
+
+# Fallback HTTP (acesso por IP e qualquer host não mapeado) — mantém o app no ar
+# enquanto o domínio não propaga.
+:80 {
+	reverse_proxy app:3000
+}

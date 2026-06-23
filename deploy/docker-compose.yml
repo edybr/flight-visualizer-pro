@@ -36,13 +36,31 @@ services:
     restart: always
     env_file:
       - .env
-    ports:
-      - "80:3000"
+    expose:
+      - "3000"
     depends_on:
       db:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
 
+  # Reverse proxy com HTTPS automático (Let's Encrypt). Assume as portas 80/443.
+  # Enquanto o DNS de djiflaylog.app não apontar para cá, o bloco :80 do Caddyfile
+  # mantém o app acessível por HTTP no IP; quando apontar, o cert é emitido sozinho.
+  caddy:
+    image: caddy:2
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
 volumes:
   dbdata:
+  caddy_data:
+  caddy_config:

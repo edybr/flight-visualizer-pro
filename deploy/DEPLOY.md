@@ -20,7 +20,7 @@ O código é entregue via **S3 + SSM** (sem SSH): um tarball do repositório fic
 | Recurso | Identificador |
 | --- | --- |
 | Instância EC2 | `i-0f7f217dc0e08c679` (t3.micro, 20GB gp3) |
-| IP público | `56.125.89.60` |
+| IP público (Elastic IP, fixo) | `54.207.140.164` (`eipalloc-09ae6a512f93ffb22`) |
 | Security Group | `sg-0bb949cfee3243850` (entrada TCP 80) |
 | Role/Instance Profile | `flightviz-ec2-role` (SSM + leitura do bucket) |
 | Bucket de deploy | `flightviz-deploy-233231934823-saeast1` |
@@ -32,8 +32,8 @@ Os arquivos de infraestrutura estão em [deploy/aws/](aws/):
 
 ## Como acessar
 
-- App: **http://56.125.89.60/**
-- Login (provisório, sem OAuth da Manus): **http://56.125.89.60/api/dev-login?secret=SEGREDO**
+- App: **http://54.207.140.164/**
+- Login (provisório, sem OAuth da Manus): **http://54.207.140.164/api/dev-login?secret=SEGREDO**
   - O `SEGREDO` é o valor de `DEV_LOGIN_SECRET` em `deploy/.env` na instância.
   - `?role=user` no fim entra como usuário comum; o padrão é admin.
 
@@ -78,10 +78,12 @@ aws ssm get-command-invocation --command-id <CMD_ID> --instance-id i-0f7f217dc0e
 
 ```bash
 aws ec2 stop-instances  --instance-ids i-0f7f217dc0e08c679   # para de cobrar a instância (volume continua)
-aws ec2 start-instances --instance-ids i-0f7f217dc0e08c679   # ATENÇÃO: o IP público muda ao reiniciar
+aws ec2 start-instances --instance-ids i-0f7f217dc0e08c679   # o IP permanece (Elastic IP fixo)
 ```
 
-> Para um IP fixo, alocar um **Elastic IP** e associar à instância.
+> O IP é fixo via **Elastic IP** (`eipalloc-09ae6a512f93ffb22` → `54.207.140.164`). Ele é
+> gratuito enquanto associado a uma instância em execução; cobra ~US$3,6/mês apenas se ficar
+> ocioso (instância parada ou EIP desassociado). Se for liberar o EIP: `aws ec2 release-address --allocation-id eipalloc-09ae6a512f93ffb22`.
 
 ## Limitações conhecidas
 

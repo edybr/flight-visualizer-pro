@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "UploadSourceToS3",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject"],
+      "Resource": "arn:aws:s3:::flightviz-deploy-233231934823-saeast1/*"
+    },
+    {
+      "Sid": "TriggerSsmDeploy",
+      "Effect": "Allow",
+      "Action": ["ssm:SendCommand"],
+      "Resource": [
+        "arn:aws:ec2:sa-east-1:233231934823:instance/i-0f7f217dc0e08c679",
+        "arn:aws:ssm:sa-east-1::document/AWS-RunShellScript"
+      ]
+    },
+    {
+      "Sid": "ReadSsmResult",
+      "Effect": "Allow",
+      "Action": ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations"],
+      "Resource": "*"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Evita dois deploys simultâneos pisando um no outro.
+concurrency:
+  group: deploy-ec2
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: sa-east-1
+
+      - name: Empacotar o código
+        run: |
+          tar -czf /tmp/flightviz-src.tgz \
+            --exclude='./node_modules' --exclude='./.git' --exclude='./dist' \
+            --exclude='./.pnpm-store' --exclude='./.env' --exclude='./.env.production' \
+            --exclude='./deploy/.env' --exclude='./.webdev' --exclude='*.tgz' .
+
+      - name: Enviar para o S3
+        run: aws s3 cp /tmp/flightviz-src.tgz s3://flightviz-deploy-233231934823-saeast1/flightviz-src.tgz
+
+      - name: Disparar redeploy via SSM e aguardar
+        run: |
+          set -e
+          CMD_ID=$(aws ssm send-command \
+            --instance-ids i-0f7f217dc0e08c679 \
+            --document-name AWS-RunShellScript \
+            --comment "GitHub Actions deploy (${GITHUB_SHA::7})" \
+            --timeout-seconds 1200 \
+            --parameters commands='["set -e","cd /opt/flightviz","aws s3 cp s3://flightviz-deploy-233231934823-saeast1/flightviz-src.tgz ./src.tgz","tar -xzf src.tgz -C app","cd app/deploy","docker compose up -d --build"]' \
+            --query "Command.CommandId" --output text)
+          echo "SSM Command: $CMD_ID"
+          for i in $(seq 1 90); do
+            sleep 10
+            STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-0f7f217dc0e08c679 --query Status --output text 2>/dev/null || echo Pending)
+            echo "status=$STATUS"
+            case "$STATUS" in
+              Success) echo "✅ Deploy concluído"; exit 0;;
+              Failed|Cancelled|TimedOut)
+                echo "❌ Deploy falhou:";
+                aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-0f7f217dc0e08c679 --query StandardErrorContent --output text || true;
+                exit 1;;
+            esac
+          done
+          echo "❌ Timeout aguardando o SSM"; exit 1

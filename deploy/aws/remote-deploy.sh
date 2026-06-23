@@ -1,10 +1,12 @@
 #!/bin/bash
-# Executado na instância EC2 via SSM. Args: <mysql_pw> <jwt_secret> <dev_login_secret>
+# Executado na instância EC2 via SSM.
+# Args: <mysql_pw> <jwt_secret> <dev_login_secret> [dji_api_key]
 set -euxo pipefail
 
 MYSQL_PW="$1"
 JWT="$2"
 DEV="$3"
+DJI="${4:-}"
 BUCKET=flightviz-deploy-233231934823-saeast1
 
 # Espera o user-data terminar (Docker + swap instalados)
@@ -31,7 +33,7 @@ DEV_LOGIN_SECRET=$DEV
 VITE_APP_ID=flight-visualizer-pro
 OAUTH_SERVER_URL=https://oauth.invalid
 VITE_OAUTH_PORTAL_URL=https://oauth.invalid
-DJI_API_KEY=
+DJI_API_KEY=$DJI
 EOF
 
 # Sobe tudo (MySQL -> migração -> app). Build acontece na instância.
