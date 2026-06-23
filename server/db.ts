@@ -252,7 +252,7 @@ export async function createActualFlight(input: InsertActualFlight): Promise<Act
 export async function listActualFlights(
   userId: number,
   filters: ActualFlightFilters = {}
-): Promise<ActualFlight[]> {
+): Promise<Omit<ActualFlight, "trajectory">[]> {
   const db = await getDb();
   if (!db) return [];
 
@@ -275,8 +275,32 @@ export async function listActualFlights(
     );
   }
 
+  // IMPORTANTE: não selecionar a coluna `trajectory` (JSON enorme). A lista só
+  // precisa dos metadados; carregar a trajetória de todos os voos estourava a
+  // query (erro 500) quando havia vários voos grandes. A contagem de pontos vem
+  // da coluna `pointsCount`.
   return await db
-    .select()
+    .select({
+      id: actualFlights.id,
+      userId: actualFlights.userId,
+      flightName: actualFlights.flightName,
+      droneModel: actualFlights.droneModel,
+      sourceFormat: actualFlights.sourceFormat,
+      sourceFileName: actualFlights.sourceFileName,
+      startedAt: actualFlights.startedAt,
+      endedAt: actualFlights.endedAt,
+      flightDate: actualFlights.flightDate,
+      durationSeconds: actualFlights.durationSeconds,
+      distanceMeters: actualFlights.distanceMeters,
+      maxAltitudeMeters: actualFlights.maxAltitudeMeters,
+      maxSpeedMs: actualFlights.maxSpeedMs,
+      pointsCount: actualFlights.pointsCount,
+      locationLabel: actualFlights.locationLabel,
+      relatedFlightId: actualFlights.relatedFlightId,
+      shareToken: actualFlights.shareToken,
+      createdAt: actualFlights.createdAt,
+      updatedAt: actualFlights.updatedAt,
+    })
     .from(actualFlights)
     .where(and(...conditions))
     .orderBy(desc(actualFlights.flightDate), desc(actualFlights.createdAt));

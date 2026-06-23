@@ -176,12 +176,10 @@ export const appRouter = router({
         })
       )
       .query(async ({ ctx, input }) => {
+        // A lista já não traz a trajetória (ver listActualFlights); a contagem
+        // de pontos vem da coluna pointsCount.
         const rows = await listActualFlights(ctx.user.id, input);
-        // Para a lista, não devolvemos a trajetória inteira (pode ser grande).
-        return rows.map((r) => {
-          const { trajectory, ...rest } = r as any;
-          return { ...rest, trajectoryPoints: Array.isArray(trajectory) ? trajectory.length : 0 };
-        });
+        return rows.map((r) => ({ ...r, trajectoryPoints: r.pointsCount ?? 0 }));
       }),
 
     get: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {

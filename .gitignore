@@ -114,3 +114,6 @@ client/public/__manus__/version.json
 
 # Documento interno de variáveis (gerado, não versionar)
 /FlightVisualizerPro_Variaveis_de_Ambiente.pdf
+
+# Amostras de voo para teste local (dados do usuário)
+/dji-samples/

@@ -205,17 +205,8 @@ export default function ActualFlights() {
             </h1>
             <p className="text-muted-foreground mt-3 max-w-xl">
               Importe o arquivo <strong className="text-foreground">FlightRecord_*.txt</strong> do DJI Fly
-              (decodificação automática no servidor) ou logs já decodificados em .csv / .kml. Para arquivos
-              de outros apps, você também pode decodificar em{" "}
-              <a
-                href="https://www.phantomhelp.com/LogViewer/"
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary underline underline-offset-2"
-              >
-                Phantom Help
-              </a>{" "}
-              / Airdata. Veja a rota real desenhada com precisão sobre o mapa.
+              (decodificação automática no servidor) ou logs já decodificados em .csv / .kml. Veja a rota
+              real desenhada com precisão sobre o mapa.
             </p>
           </div>
           <div className="flex flex-col items-stretch gap-2.5 lg:items-end">
