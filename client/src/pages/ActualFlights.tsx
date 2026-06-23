@@ -168,22 +168,22 @@ export default function ActualFlights() {
             </div>
           </button>
           <div className="flex items-center gap-4">
-            <nav className="hidden md:flex items-center gap-1 mr-4 rounded-full border border-border/60 bg-muted/60 p-1">
+            <nav className="hidden md:flex items-center gap-1.5 mr-4 rounded-full border border-border/60 bg-muted/30 p-1">
               <button
                 onClick={() => navigate("/app")}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs tracking-[0.18em] uppercase rounded-full text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 text-xs tracking-[0.18em] uppercase rounded-full bg-[#eff6ff] text-[#1d4ed8] hover:bg-[#dbeafe] transition-colors"
               >
                 <PlaneTakeoff className="h-3.5 w-3.5" /> Autorizados
-                <span className="ml-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/15 text-primary border border-primary/30">
+                <span className="ml-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-semibold rounded-full bg-white/85 text-[#1d4ed8] border border-[#bfdbfe]">
                   {authorizedCount}
                 </span>
               </button>
               <button
                 onClick={() => navigate("/app/actual")}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs tracking-[0.18em] uppercase rounded-full bg-background text-primary shadow-sm"
+                className="flex items-center gap-2 px-3 py-1.5 text-xs tracking-[0.18em] uppercase rounded-full bg-[#ecdcc0] text-[#5c4a2a] shadow-sm ring-1 ring-[#d8c49a]"
               >
                 <RouteIcon className="h-3.5 w-3.5" /> Realizados
-                <span className="ml-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-medium rounded-full bg-accent/20 text-accent border border-accent/40">
+                <span className="ml-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-semibold rounded-full bg-white/85 text-[#5c4a2a] border border-[#d8c49a]">
                   {actualTotal}
                 </span>
               </button>
