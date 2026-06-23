@@ -5,10 +5,16 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Evita dois deploys simultâneos pisando um no outro.
 concurrency:
   group: deploy-ec2
   cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/edybr/flight-visualizer-pro
 
 jobs:
   deploy:
@@ -17,6 +23,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login no GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build da imagem nos runners do GitHub (rápidos) + cache de camadas.
+      - name: Build e push da imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runtime
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       - name: Configurar credenciais AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -24,32 +53,38 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: sa-east-1
 
-      - name: Empacotar o código
+      # Envia os arquivos de deploy (compose + Caddyfile + scripts) e o script remoto.
+      - name: Enviar arquivos de deploy para o S3
         run: |
-          tar -czf /tmp/flightviz-src.tgz \
-            --exclude='./node_modules' --exclude='./.git' --exclude='./dist' \
-            --exclude='./.pnpm-store' --exclude='./.env' --exclude='./.env.production' \
-            --exclude='./deploy/.env' --exclude='./.webdev' --exclude='*.tgz' .
+          tar -czf /tmp/deploy.tgz --exclude='deploy/.env' deploy
+          aws s3 cp /tmp/deploy.tgz s3://flightviz-deploy-233231934823-saeast1/deploy.tgz
+          aws s3 cp deploy/aws/ci-remote-deploy.sh s3://flightviz-deploy-233231934823-saeast1/ci-remote-deploy.sh
 
-      - name: Enviar para o S3
-        run: aws s3 cp /tmp/flightviz-src.tgz s3://flightviz-deploy-233231934823-saeast1/flightviz-src.tgz
-
-      - name: Disparar redeploy via SSM e aguardar
+      # EC2 só faz pull da imagem pronta e sobe (não compila nada).
+      - name: Deploy via SSM (pull da imagem)
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.sha }}
         run: |
           set -e
+          PARAMS=$(jq -nc \
+            --arg dl "aws s3 cp s3://flightviz-deploy-233231934823-saeast1/ci-remote-deploy.sh /tmp/rd.sh" \
+            --arg run "bash /tmp/rd.sh '$GHCR_USER' '$GHCR_TOKEN' '$SHA'" \
+            '{commands: [$dl, $run]}')
           CMD_ID=$(aws ssm send-command \
             --instance-ids i-0f7f217dc0e08c679 \
             --document-name AWS-RunShellScript \
-            --comment "GitHub Actions deploy (${GITHUB_SHA::7})" \
-            --timeout-seconds 1200 \
-            --parameters commands='["set -e","cd /opt/flightviz","aws s3 cp s3://flightviz-deploy-233231934823-saeast1/flightviz-src.tgz ./src.tgz","tar -xzf src.tgz -C app","cd app/deploy","docker compose up -d --build"]' \
+            --comment "deploy ${SHA::7}" \
+            --timeout-seconds 600 \
+            --parameters "$PARAMS" \
             --query "Command.CommandId" --output text)
           echo "SSM Command: $CMD_ID"
-          for i in $(seq 1 90); do
-            sleep 10
-            STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-0f7f217dc0e08c679 --query Status --output text 2>/dev/null || echo Pending)
-            echo "status=$STATUS"
-            case "$STATUS" in
+          for i in $(seq 1 60); do
+            sleep 8
+            S=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id i-0f7f217dc0e08c679 --query Status --output text 2>/dev/null || echo Pending)
+            echo "status=$S"
+            case "$S" in
               Success) echo "✅ Deploy concluído"; exit 0;;
               Failed|Cancelled|TimedOut)
                 echo "❌ Deploy falhou:";

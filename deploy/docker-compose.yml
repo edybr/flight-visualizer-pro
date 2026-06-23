@@ -1,5 +1,6 @@
 # docker-compose para a instância EC2.
-# Sobe: MySQL 8 (com volume persistente) -> migração do schema -> app Node.
+# A imagem do app é construída no GitHub Actions e publicada no GHCR; aqui o EC2
+# apenas faz `pull` (não compila). As migrações rodam no startup do app.
 # Variáveis vêm do arquivo deploy/.env (ver deploy/.env.example).
 
 services:
@@ -17,22 +18,8 @@ services:
       timeout: 5s
       retries: 20
 
-  migrate:
-    build:
-      context: ..
-      target: build
-    command: pnpm drizzle-kit migrate
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: "no"
-
   app:
-    build:
-      context: ..
-      target: runtime
+    image: ghcr.io/edybr/flight-visualizer-pro:${IMAGE_TAG:-latest}
     restart: always
     env_file:
       - .env
@@ -41,8 +28,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
 
   # Reverse proxy com HTTPS automático (Let's Encrypt). Assume as portas 80/443.
   # Enquanto o DNS de djiflaylog.app não apontar para cá, o bloco :80 do Caddyfile
