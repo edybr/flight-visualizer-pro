@@ -6,7 +6,7 @@
 // ── Personalize aqui ──────────────────────────────────────────────────────────
 const APP_NAME = "Flight Visualizer Pro"; // Nome exibido no rodapé
 const AUTHOR_CREDIT = ""; // Ex.: "by Seu Nome" — deixe vazio para ocultar
-const CONTACT_INFO = ""; // Ex.: e-mail, site ou qualquer texto de contato
+const CONTACT_INFO = "Faça uma doação: Pix isaias.oceano@gmail.com"; // texto exibido à direita
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function SiteFooter() {

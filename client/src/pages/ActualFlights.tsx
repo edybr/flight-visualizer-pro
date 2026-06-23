@@ -68,6 +68,12 @@ export default function ActualFlights() {
 
   const query = trpc.actualFlights.list.useQuery(filters, { enabled: !!user });
 
+  // Totais (sem filtro) para os badges das abas
+  const authorizedCountQuery = trpc.flights.list.useQuery({}, { enabled: !!user });
+  const authorizedCount = authorizedCountQuery.data?.length ?? 0;
+  const actualTotalQuery = trpc.actualFlights.list.useQuery({}, { enabled: !!user });
+  const actualTotal = actualTotalQuery.data?.length ?? 0;
+
   const utils = trpc.useUtils();
   const importMutation = trpc.actualFlights.import.useMutation({
     onSuccess: () => {
@@ -162,18 +168,24 @@ export default function ActualFlights() {
             </div>
           </button>
           <div className="flex items-center gap-4">
-            <nav className="hidden md:flex items-center gap-1 mr-4">
+            <nav className="hidden md:flex items-center gap-1 mr-4 rounded-full border border-border/60 bg-muted/60 p-1">
               <button
                 onClick={() => navigate("/app")}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs tracking-[0.18em] uppercase text-muted-foreground hover:text-foreground transition-colors border-b-2 border-transparent hover:border-border"
+                className="flex items-center gap-2 px-3 py-1.5 text-xs tracking-[0.18em] uppercase rounded-full text-muted-foreground hover:text-foreground transition-colors"
               >
                 <PlaneTakeoff className="h-3.5 w-3.5" /> Autorizados
+                <span className="ml-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/15 text-primary border border-primary/30">
+                  {authorizedCount}
+                </span>
               </button>
               <button
                 onClick={() => navigate("/app/actual")}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs tracking-[0.18em] uppercase text-primary border-b-2 border-primary"
+                className="flex items-center gap-2 px-3 py-1.5 text-xs tracking-[0.18em] uppercase rounded-full bg-background text-primary shadow-sm"
               >
                 <RouteIcon className="h-3.5 w-3.5" /> Realizados
+                <span className="ml-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-medium rounded-full bg-accent/20 text-accent border border-accent/40">
+                  {actualTotal}
+                </span>
               </button>
             </nav>
             <button
