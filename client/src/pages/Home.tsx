@@ -173,9 +173,8 @@ export default function Home() {
         <div className="container py-10 flex flex-col items-center justify-between gap-5 text-sm text-muted-foreground sm:flex-row">
           <div className="flex items-center gap-2">
             <span>© {new Date().getFullYear()} Flight Visualizer Pro</span>
-            {/* Adicione seu crédito aqui, ex.: <span>· by Seu Nome</span> */}
           </div>
-          {/* Adicione informações de contato ou links aqui */}
+          <div>Faça uma doação: Pix isaias.oceano@gmail.com</div>
         </div>
       </footer>
     </div>
