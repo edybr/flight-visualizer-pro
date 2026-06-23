@@ -192,6 +192,10 @@
 .leaflet-container {
   font-family: var(--font-sans);
   background: oklch(0.96 0.01 85);
+  /* O Leaflet usa z-index altos (panes/controls 400–1000) que escapavam e cobriam
+     a navbar (z-30) e os modais (z-50). Isolar o mapa num stacking context próprio
+     mantém esses z-index contidos, sem quebrar a sobreposição interna do Leaflet. */
+  isolation: isolate;
 }
 .dark .leaflet-container {
   background: oklch(0.24 0.02 250);
