@@ -48,7 +48,12 @@ export type PdfOptions = {
   appVersion: string;
   /** Máximo de linhas na tabela de telemetria. <=0 = todos os pontos. */
   maxRows?: number;
-  pixKey?: string;
+  /**
+   * Texto de crédito exibido no rodapé esquerdo de cada página do PDF.
+   * Ex.: "Minha Empresa  ·  contato@empresa.com"
+   * Deixe vazio ou omita para exibir apenas o nome do app.
+   */
+  footerCredit?: string;
 };
 
 function fmtDuration(seconds?: number | null): string {
@@ -324,8 +329,9 @@ export function generateTelemetryPdf(
     },
   });
 
-  // ---- Rodapé em todas as páginas (crédito + Pix) ----
-  const pix = opts.pixKey ?? "isaias.oceano@gmail.com";
+  // ---- Rodapé em todas as páginas ----
+  // Para personalizar: passe opts.footerCredit = "Sua Empresa  ·  contato@empresa.com"
+  const creditLeft = opts.footerCredit ?? "Flight Visualizer Pro";
   const pageCount = doc.getNumberOfPages();
   for (let p = 1; p <= pageCount; p++) {
     doc.setPage(p);
@@ -336,9 +342,7 @@ export function generateTelemetryPdf(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
     doc.setTextColor(...MUTED);
-    doc.text("Flight Visualizer Pro  ·  by Isaias Alves", marginX, fy);
-    doc.setTextColor(...GOLD);
-    doc.text(`Doação Pix: ${pix}`, pageW / 2, fy, { align: "center" });
+    doc.text(creditLeft, marginX, fy);
     doc.setTextColor(...MUTED);
     doc.text(`Página ${p} de ${pageCount}`, pageW - marginX, fy, { align: "right" });
   }

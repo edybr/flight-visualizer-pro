@@ -1,55 +1,34 @@
-import { useState } from "react";
-import { Heart, Copy, Check } from "lucide-react";
-import { toast } from "sonner";
-
-const PIX_KEY = "isaias.oceano@gmail.com";
-
 /**
- * Rodapé global com crédito do autor e opção de doação via Pix.
- * Usado nas páginas internas e públicas.
+ * Rodapé global da aplicação.
+ * Edite as constantes abaixo para personalizar o conteúdo exibido.
  */
+
+// ── Personalize aqui ──────────────────────────────────────────────────────────
+const APP_NAME = "Flight Visualizer Pro"; // Nome exibido no rodapé
+const AUTHOR_CREDIT = ""; // Ex.: "by Seu Nome" — deixe vazio para ocultar
+const CONTACT_INFO = ""; // Ex.: e-mail, site ou qualquer texto de contato
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function SiteFooter() {
-  const [copied, setCopied] = useState(false);
-
-  const copyPix = () => {
-    navigator.clipboard.writeText(PIX_KEY);
-    setCopied(true);
-    toast.success("Chave Pix copiada.");
-    window.setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
     <footer className="no-print border-t border-border/60 bg-card/50 mt-16">
       <div className="container py-8">
         <div className="flex flex-col items-center justify-between gap-5 sm:flex-row">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="font-serif text-base text-foreground">Flight Visualizer Pro</span>
-            <span className="text-border">·</span>
-            <span>
-              by <span className="font-medium text-foreground">Isaias Alves</span>
-            </span>
+            <span className="font-serif text-base text-foreground">{APP_NAME}</span>
+            {AUTHOR_CREDIT && (
+              <>
+                <span className="text-border">·</span>
+                <span>{AUTHOR_CREDIT}</span>
+              </>
+            )}
           </div>
 
-          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
-            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Heart className="h-3.5 w-3.5 text-accent" />
-              Faça uma doação
-            </span>
-            <button
-              type="button"
-              onClick={copyPix}
-              className="group flex items-center gap-2 rounded-full border border-border/70 bg-background px-3.5 py-1.5 text-sm transition-transform active:scale-[0.98] hover:border-accent/60"
-              aria-label="Copiar chave Pix"
-            >
-              <span className="text-xs uppercase tracking-wider text-accent">Pix</span>
-              <span className="font-mono text-xs text-foreground">{PIX_KEY}</span>
-              {copied ? (
-                <Check className="h-3.5 w-3.5 text-emerald-600" />
-              ) : (
-                <Copy className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground" />
-              )}
-            </button>
-          </div>
+          {CONTACT_INFO && (
+            <div className="text-sm text-muted-foreground">
+              {CONTACT_INFO}
+            </div>
+          )}
         </div>
       </div>
     </footer>

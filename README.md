@@ -279,5 +279,5 @@ métricas administrativas. Todos os testes devem passar antes de cada publicaç�
 
 ## Créditos
 
-Desenvolvido por **Isaias Alves**.
-Apoie o projeto via Pix: `isaias.oceano@gmail.com`.
+Desenvolvido por: _preencha aqui_
+Contato: _preencha aqui_
