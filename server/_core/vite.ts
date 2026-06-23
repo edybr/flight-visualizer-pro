@@ -3,20 +3,21 @@ import fs from "fs";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
 import path from "path";
-import { createServer as createViteServer } from "vite";
-import viteConfig from "../../vite.config";
 
 export async function setupVite(app: Express, server: Server) {
-  const serverOptions = {
-    middlewareMode: true,
-    hmr: { server },
-    allowedHosts: true as const,
-  };
+  // Import dinâmico do `vite` (só em dev). NÃO importamos o vite.config aqui:
+  // o esbuild "içaria" (hoist) os imports estáticos dos plugins pro topo do
+  // bundle, forçando o runtime de produção a tê-los. Em vez disso, deixamos o
+  // próprio vite carregar o vite.config.ts do disco (presente em dev). Assim o
+  // bundle de produção não precisa do vite nem das devDeps (pnpm prune --prod).
+  const { createServer: createViteServer } = await import("vite");
 
   const vite = await createViteServer({
-    ...viteConfig,
-    configFile: false,
-    server: serverOptions,
+    server: {
+      middlewareMode: true,
+      hmr: { server },
+      allowedHosts: true as const,
+    },
     appType: "custom",
   });
 

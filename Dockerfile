@@ -24,17 +24,20 @@ RUN printf 'VITE_APP_ID=%s\nVITE_OAUTH_PORTAL_URL=%s\n' "$VITE_APP_ID" "$VITE_OA
 ENV NODE_OPTIONS=--max-old-space-size=2048
 RUN pnpm build
 
+# ---- prod-deps stage: remove devDependencies para um runtime enxuto ----
+# Agora é seguro: o `vite` só é carregado em dev (import dinâmico em
+# server/_core/vite.ts), então o bundle de produção não precisa das devDeps.
+FROM build AS prod-deps
+RUN pnpm prune --prod
+
 # ---- runtime stage ----
-# NÃO removemos as devDependencies: o bundle do servidor (esbuild --packages=external)
-# importa o `vite` de forma eager mesmo em produção (server/_core/vite.ts), então o
-# node_modules precisa ficar completo no runtime.
 FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/node_modules ./node_modules
+COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
 # Migrações Drizzle (.sql + meta/_journal.json) — aplicadas no startup (runMigrations).
 COPY --from=build /app/drizzle ./drizzle
